@@ -8,6 +8,7 @@ from app.db.sync_engine import SyncSessionFactory
 from app.reports.autodiscover import autodiscover_reports
 from app.reports.registry import registry
 from app.workers.celery_app import celery_app
+from app.workers.transitions import assert_transition
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,7 @@ def generate_report(self, run_id: str) -> dict:  # type: ignore[type-arg]
             return {"status": "error", "detail": "run not found"}
 
         # Transition → RUNNING
+        assert_transition(run.status, RunStatus.RUNNING)
         run.status = RunStatus.RUNNING
         run.started_at = datetime.now(timezone.utc)
         session.commit()
@@ -62,6 +64,7 @@ def generate_report(self, run_id: str) -> dict:  # type: ignore[type-arg]
             report.generate(output_path=output_path)
 
             # Transition → DONE
+            assert_transition(run.status, RunStatus.DONE)
             run.status = RunStatus.DONE
             run.result_path = filename
             run.finished_at = datetime.now(timezone.utc)
@@ -73,6 +76,7 @@ def generate_report(self, run_id: str) -> dict:  # type: ignore[type-arg]
         except Exception as exc:
             logger.exception("Report run %s failed.", run_id)
 
+            assert_transition(run.status, RunStatus.FAILED)
             run.status = RunStatus.FAILED
             run.error_message = str(exc)
             run.finished_at = datetime.now(timezone.utc)
