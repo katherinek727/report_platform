@@ -16,6 +16,25 @@ from app.db.session import get_session
 router = APIRouter(tags=["runs"])
 
 
+@router.get(
+    "/runs/{run_id}",
+    response_model=ReportRunSchema,
+    summary="Get a single run by ID",
+)
+async def get_run(
+    run_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> ReportRunSchema:
+    """Return the current state of a report run, including status and timestamps."""
+    run = await session.get(ReportRun, run_id)
+    if run is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Run '{run_id}' not found.",
+        )
+    return ReportRunSchema.model_validate(run)
+
+
 @router.post(
     "/reports/{report_slug}/runs",
     response_model=TriggerRunResponse,
