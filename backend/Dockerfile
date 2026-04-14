@@ -8,6 +8,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
 # ── deps layer (cached unless pyproject.toml changes) ──────────────────────
 FROM base AS deps
 
@@ -28,5 +31,7 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload
 FROM deps AS production
 
 COPY . .
+# Ensure worker entrypoint is executable
+RUN chmod +x worker.sh
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

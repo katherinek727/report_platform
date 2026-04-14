@@ -41,7 +41,13 @@ def generate_report(self, run_id: str) -> dict:  # type: ignore[type-arg]
     _ensure_registry()
 
     with SyncSessionFactory() as session:
-        run: ReportRun | None = session.get(ReportRun, uuid.UUID(run_id))
+        from sqlalchemy.orm import joinedload
+        run: ReportRun | None = (
+            session.query(ReportRun)
+            .options(joinedload(ReportRun.report))
+            .filter(ReportRun.id == uuid.UUID(run_id))
+            .first()
+        )
 
         if run is None:
             logger.error("ReportRun %s not found — aborting task.", run_id)
