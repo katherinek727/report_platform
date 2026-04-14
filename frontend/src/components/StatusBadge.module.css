@@ -1,0 +1,35 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.pending  { background: var(--color-slate-100);   color: var(--color-slate-600); }
+.pending .dot  { background: var(--color-slate-400); }
+
+.running  { background: var(--color-info-bg);     color: #1d4ed8; }
+.running .dot  { background: var(--color-info); animation: pulse 1.2s ease-in-out infinite; }
+
+.done     { background: var(--color-success-bg);  color: #065f46; }
+.done .dot     { background: var(--color-success); }
+
+.failed   { background: var(--color-danger-bg);   color: #991b1b; }
+.failed .dot   { background: var(--color-danger); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
