@@ -21,15 +21,15 @@
 .pending .dot  { background: var(--color-slate-400); }
 
 .running  { background: var(--color-info-bg);     color: #1d4ed8; }
-.running .dot  { background: var(--color-info); animation: pulse 1.2s ease-in-out infinite; }
+.running .dot  { background: var(--color-info); animation: pulse 1s ease-in-out infinite; }
 
 .done     { background: var(--color-success-bg);  color: #065f46; }
 .done .dot     { background: var(--color-success); }
 
-.failed   { background: var(--color-danger-bg);   color: #991b1b; }
-.failed .dot   { background: var(--color-danger); }
+.failed   { background: #fff1f2;   color: #9f1239; }
+.failed .dot   { background: #f43f5e; }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  0%, 100% { opacity: 1;   transform: scale(1);    }
+  50%       { opacity: 0.3; transform: scale(0.75); }
 }
