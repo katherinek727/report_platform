@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 
@@ -15,6 +16,8 @@ from app.core.config import settings
 from app.db.models.report import Report
 from app.db.models.report_run import ReportRun, RunStatus
 from app.db.session import get_session
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["runs"])
 
@@ -160,8 +163,17 @@ async def download_run(
             detail="Result file path is not recorded for this run.",
         )
 
-    file_path = os.path.join(settings.storage_path, run.result_path)
+    # result_path is stored as a filename only (e.g. "sales-summary_<uuid>.xlsx")
+    # Guard against any accidental absolute path stored in older records
+    filename = os.path.basename(run.result_path)
+    file_path = os.path.join(settings.storage_path, filename)
+
     if not os.path.isfile(file_path):
+        logger.warning(
+            "Download requested for run %s but file not found at %s",
+            run_id,
+            file_path,
+        )
         raise HTTPException(
             status_code=status.HTTP_410_GONE,
             detail="Result file no longer exists in storage.",
@@ -173,5 +185,5 @@ async def download_run(
     return FileResponse(
         path=file_path,
         media_type=media_type,
-        filename=run.result_path,
+        filename=filename,
     )
