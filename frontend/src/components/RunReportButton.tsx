@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/api/client";
 import { routes } from "@/routes";
+import { useToast } from "@/components/Toast";
 import styles from "./RunReportButton.module.css";
 
 type State = "idle" | "loading" | "success" | "error";
@@ -15,6 +16,7 @@ export default function RunReportButton({ reportSlug, onSuccess }: Props) {
   const [state, setState] = useState<State>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   async function handleClick() {
     if (state === "loading") return;
@@ -26,6 +28,7 @@ export default function RunReportButton({ reportSlug, onSuccess }: Props) {
       const res = await api.runs.trigger(reportSlug);
       setState("success");
       onSuccess?.(res.run_id);
+      toast("Report generation started", "success");
 
       // Navigate to the run detail after a brief success flash
       setTimeout(() => {
@@ -33,7 +36,9 @@ export default function RunReportButton({ reportSlug, onSuccess }: Props) {
       }, 600);
     } catch (err) {
       setState("error");
-      setErrorMsg(err instanceof Error ? err.message : "Failed to trigger report");
+      const msg = err instanceof Error ? err.message : "Failed to trigger report";
+      setErrorMsg(msg);
+      toast(msg, "error");
       setTimeout(() => setState("idle"), 3000);
     }
   }
